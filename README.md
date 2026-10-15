@@ -1,5 +1,7 @@
 # nice-kit
 
+**繁體中文** · [English](docs/readme/README_en.md) · [简体中文](docs/readme/README_zh.md) · [日本語](docs/readme/README_ja.md)
+
 一套給「企業 AI 導入 / 舊系統盤點」顧問案用的專案骨架。
 **不綁定單一 agent**：Claude Code、Codex、Cursor、Gemini CLI、Copilot、OpenCode、Hermes 都能用。
 不是另一個 skill 大全，而是**五個工具、一條流程**，開案直接跑。
@@ -12,7 +14,7 @@ grill-the-client ──► spec-kit ──► REA + DB MCP ──► superpowers
 
 ## 為什麼只有五個
 
-每個 skill 都在跟 Claude 爭 context。裝太多會變慢、互相打架。
+每個 skill 都在跟 agent 爭 context。裝太多會變慢、互相打架。
 這套選擇標準只有三條：**高頻使用、需要領域知識、錯了很貴**。三條都中才進來。
 
 | 階段 | 工具 | 解決的問題 | 來源 |
@@ -84,7 +86,8 @@ nice-kit/
 │   ├── workflow.md            # 六步流程詳解
 │   ├── agents.md              # 各 agent 相容矩陣與名稱對照
 │   ├── db-mcp.md              # 資料庫 MCP 選型
-│   └── legal.md               # 授權與資安前提
+│   ├── legal.md               # 授權與資安前提
+│   └── readme/                # 其他語言的 README
 └── skills/
     ├── grill-the-client/SKILL.md
     └── inventory-gaps/SKILL.md
