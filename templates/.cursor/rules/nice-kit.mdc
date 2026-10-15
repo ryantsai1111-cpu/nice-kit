@@ -1,0 +1,5 @@
+---
+description: nice-kit 專案規範，讀取 AGENTS.md
+alwaysApply: true
+---
+本專案的所有規則在根目錄的 `AGENTS.md`。開始任何工作前先讀它，特別是「資料敏感度」與「不要做的事」兩節。

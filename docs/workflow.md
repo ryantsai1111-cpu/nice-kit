@@ -5,18 +5,17 @@
 ## 0. 開案
 
 ```bash
-specify init <案名> --integration claude   # 建立 .specify/ 與 /speckit.* 指令
+~/nice-kit/scripts/init.sh <案名> -a <agent,agent,...>
 cd <案名>
-cp ~/nice-kit/templates/CLAUDE.md .
-mkdir -p .grill inventory
-claude
 ```
 
-spec-kit 是每個專案各自 init，不是全域 skill。`--script ps` 可強制用 PowerShell 腳本。
+init 會跑 `specify init`（每個 agent 一份 spec-kit 指令）、放入 AGENTS.md / CLAUDE.md / GEMINI.md /
+`.cursor/rules` / PROGRESS.md、建 `.grill/` 與 `inventory/`。
 
-填 CLAUDE.md 裡的 `<>`。只填知道的，不知道的留著，第 1 步會問出來。
+填 AGENTS.md 裡的 `<>`。只填知道的，不知道的留著，第 1 步會問出來。
+CLAUDE.md 和 GEMINI.md 只是 `@AGENTS.md`，不要另外改。
 
-## 1. 訪談 `/grill-the-client`
+## 1. 訪談 grill-the-client
 
 - **輸入**：一位受訪者，一個主題。
 - **輸出**：`.grill/YYYY-MM-DD-<主題>.md`
@@ -28,10 +27,11 @@ spec-kit 是每個專案各自 init，不是全域 skill。`--script ps` 可強�
 ## 2. 規格 spec-kit
 
 ```
-/speckit.constitution   # 不變的原則：資料不出機房、唯讀優先、人工核准
-/speckit.specify        # 這次要做什麼、不做什麼，從 .grill/ 的共識流程來
-/speckit.clarify        # 把 specify 裡模糊的地方問清楚
+speckit.constitution   # 不變的原則：資料不出機房、唯讀優先、人工核准
+speckit.specify        # 這次要做什麼、不做什麼，從 .grill/ 的共識流程來
+speckit.clarify        # 把 specify 裡模糊的地方問清楚
 ```
+（Claude / Gemini / Copilot 前面加 `/`，Codex 加 `$`，無 slash 的 agent 用自然語言；見 docs/agents.md）
 
 - **輸出**：`specs/constitution.md`、`specs/<feature>/spec.md`
 - **做完的定義**：spec 裡沒有「待確認」；每條需求都能回溯到某個 `.grill/` 檔。
@@ -60,14 +60,14 @@ spec-kit 是每個專案各自 init，不是全域 skill。`--script ps` 可強�
 - **做完的定義**：每個 spec 需求都有對應的盤點章節，未知項已集中列出。
 - **提醒**：REA 第一次跑大型 binary 可能要調 `REA_GHIDRA_STARTUP_TIMEOUT_MS`。
 
-## 4. 補缺 `/inventory-gaps` → `/grill-the-client`
+## 4. 補缺 inventory-gaps → grill-the-client
 
 ```
-/inventory-gaps inventory/report.md
+載入 inventory-gaps，輸入 inventory/report.md
 ```
 產出 `.grill/gaps-YYYY-MM-DD.md`，然後：
 ```
-/grill-the-client .grill/gaps-YYYY-MM-DD.md
+載入 grill-the-client，輸入 .grill/gaps-YYYY-MM-DD.md
 ```
 
 - **做完的定義**：gaps 檔裡每題都標了「已解 / 部分解 / 需要找別人」；「需要找別人」的已排進下一輪。
@@ -76,8 +76,8 @@ spec-kit 是每個專案各自 init，不是全域 skill。`--script ps` 可強�
 ## 5. 計畫 spec-kit
 
 ```
-/speckit.plan     # 技術做法：哪些用唯讀查詢、哪些要包 tool、哪些不碰
-/speckit.tasks    # 拆成任務，每個任務可獨立驗收
+speckit.plan     # 技術做法：哪些用唯讀查詢、哪些要包 tool、哪些不碰
+speckit.tasks    # 拆成任務，每個任務可獨立驗收
 ```
 
 - **輸出**：`specs/<feature>/plan.md`、`tasks.md`
@@ -90,10 +90,13 @@ superpowers 裝好後會自動介入：brainstorm → 寫 plan → TDD → 子 a
 - 每個任務開始前確認它在 spec 範圍內
 - 涉及寫入資料庫的任務，一律加人工核准步驟
 
-## 貫穿全程：claude-mem
+## 貫穿全程：記憶
 
-裝好後不用管。它會把每個 session 做的事壓縮存起來，下次開 Claude Code 自動帶進來。
-案子拖三週回來，不用重講一遍。
+- **PROGRESS.md**：每個 session 結束前更新。AGENTS.md 規定每次開始先讀。所有 agent 通用。
+- **planning-with-files**：計畫寫成 repo 裡的 markdown，任何 agent 都讀得到。
+- **claude-mem**（Claude Code 才有）：自動壓縮每個 session，額外加分，不依賴。
+
+案子拖三週回來，換一個 agent 也能接。
 
 ## 結案交付
 

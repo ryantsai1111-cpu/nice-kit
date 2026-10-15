@@ -1,12 +1,13 @@
 # nice-kit
 
-一套給「企業 AI 導入 / 舊系統盤點」顧問案用的 Claude Code 專案骨架。
+一套給「企業 AI 導入 / 舊系統盤點」顧問案用的專案骨架。
+**不綁定單一 agent**：Claude Code、Codex、Cursor、Gemini CLI、Copilot、OpenCode、Hermes 都能用。
 不是另一個 skill 大全，而是**五個工具、一條流程**，開案直接跑。
 
 ```
 grill-the-client ──► spec-kit ──► REA + DB MCP ──► superpowers
    (訪談)             (規格)          (盤點)           (實作)
-                └──────────── claude-mem（跨 session 記憶）────────────┘
+             └──── PROGRESS.md + planning-with-files（跨 session 記憶）────┘
 ```
 
 ## 為什麼只有五個
@@ -21,44 +22,45 @@ grill-the-client ──► spec-kit ──► REA + DB MCP ──► superpowers
 | 盤點 | [REA](https://github.com/morluto/rea) | 沒原始碼的系統（.NET / Electron / APK / 封包） | MIT |
 | 盤點 | 資料庫 MCP server | 有唯讀帳號就能直讀 schema，比反編譯快 | 依客戶 DB 選 |
 | 實作 | [superpowers](https://github.com/obra/superpowers) | Claude 不想清楚就寫 code | Anthropic 官方 marketplace |
-| 記憶 | [claude-mem](https://github.com/thedotmack/claude-mem) | 案子拖幾週，每次重頭講 | 社群 |
+| 記憶 | `PROGRESS.md` + [planning-with-files](https://github.com/OthmanAdi/planning-with-files) | 案子拖幾週，每次重頭講 | 所有 agent 通用；Claude Code 另加 [claude-mem](https://github.com/thedotmack/claude-mem) |
 | 補缺 | `inventory-gaps`（本 repo） | 把 REA 的 unknowns 變成訪談題目 | 原創 |
 
 ## 安裝
 
-需要 Node.js 22.19+、Claude Code；spec-kit 需要 [uv](https://docs.astral.sh/uv/)（腳本會自動裝）。
+需要 Node.js 22.19+ 和至少一個 agent CLI。spec-kit 需要 [uv](https://docs.astral.sh/uv/)（腳本會自動裝）。
 
+**只要 skills（任何 agent）：**
 ```bash
-git clone https://github.com/ryantsai1111-cpu/nice-kit
-cd nice-kit
-./scripts/install.sh        # macOS / Linux
-# 或
-.\scripts\install.ps1       # Windows PowerShell
+npx skills add ryantsai1111-cpu/nice-kit --agent codex -g      # 換成你的 agent
 ```
 
-腳本會：
-1. 裝 superpowers（skills.sh）與 spec-kit 的 `specify` CLI（uv）
-2. 安裝 claude-mem plugin
-3. 跑 `npx rea-agents setup`（互動式，會問你要註冊哪些 agent）
-4. 把本 repo 的 `skills/` 複製到 `~/.claude/skills/`
+**完整安裝（skills + superpowers + spec-kit + REA + 記憶）：**
+```bash
+git clone https://github.com/ryantsai1111-cpu/nice-kit && cd nice-kit
+./scripts/install.sh                      # 自動偵測已裝的 agent
+./scripts/install.sh -a claude-code,codex # 或指定
+.\scripts\install.ps1                     # Windows
+./scripts/doctor.sh                       # 檢查
+```
 
+agent 識別碼與各工具的相容狀況見 [docs/agents.md](docs/agents.md)。
 資料庫 MCP server 依客戶環境不同，見 [docs/db-mcp.md](docs/db-mcp.md)。
 
 ## 開案流程
 
 ```bash
-specify init <案名> --integration claude   # spec-kit 建立 /speckit.* 指令
-cd <案名> && cp ~/nice-kit/templates/CLAUDE.md .
+./scripts/init.sh <案名>                  # 跑 specify init、放 AGENTS.md 等範本
+./scripts/init.sh <案名> -a codex,cursor  # 多 agent
 ```
-然後依序：
+然後依序（slash command 寫法依 agent 略有不同，見 docs/agents.md）：
 
-| 步驟 | 指令 | 產出 |
+| 步驟 | 怎麼觸發 | 產出 |
 |---|---|---|
-| 1 | `/grill-the-client` | `.grill/<日期>-<主題>.md` 訪談紀錄 |
-| 2 | `/speckit.constitution` → `/speckit.specify` → `/speckit.clarify` | `specs/` 範圍與限制 |
+| 1 | 載入 `grill-the-client`（或說「訪談客戶」） | `.grill/<日期>-<主題>.md` 訪談紀錄 |
+| 2 | spec-kit：constitution → specify → clarify | `specs/` 範圍與限制 |
 | 3 | 「用 REA 盤點 `<路徑>`，列出所有 unknowns」 | 盤點報告 + unknowns 清單 |
-| 4 | `/inventory-gaps` | 把 unknowns 轉成第二輪訪談題目 |
-| 5 | `/speckit.plan` → `/speckit.tasks` | 任務清單 |
+| 4 | 載入 `inventory-gaps`（或說「整理 unknowns」） | 第二輪訪談題目 |
+| 5 | spec-kit：plan → tasks | 任務清單 |
 | 6 | superpowers 自動接手實作 | 程式碼 + 測試 |
 
 完整說明見 [docs/workflow.md](docs/workflow.md)。
@@ -70,12 +72,17 @@ nice-kit/
 ├── README.md
 ├── LICENSE
 ├── scripts/
-│   ├── install.sh
-│   └── install.ps1
+│   ├── install.sh / .ps1      # 多 agent 安裝
+│   ├── init.sh / .ps1         # 開新案
+│   └── doctor.sh              # 檢查安裝
 ├── templates/
-│   └── CLAUDE.md              # 新專案根目錄用
+│   ├── AGENTS.md              # 專案規範主檔（所有 agent 讀）
+│   ├── CLAUDE.md / GEMINI.md  # 只有一行 @AGENTS.md
+│   ├── .cursor/rules/         # Cursor 指向 AGENTS.md
+│   └── PROGRESS.md            # 跨 session 記憶
 ├── docs/
 │   ├── workflow.md            # 六步流程詳解
+│   ├── agents.md              # 各 agent 相容矩陣與名稱對照
 │   ├── db-mcp.md              # 資料庫 MCP 選型
 │   └── legal.md               # 授權與資安前提
 └── skills/

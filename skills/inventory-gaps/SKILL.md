@@ -1,6 +1,6 @@
 ---
 name: inventory-gaps
-description: 把 REA 或資料庫掃描結果中的 unknowns、limitations、低信心結論，整理成可以直接拿去訪談的問題清單，並標記每題該問誰、優先級、以及答案會影響哪個決策。用在系統盤點掃描完成之後、第二輪訪談之前。觸發語：「/inventory-gaps」、「整理 unknowns」、「掃描後還有什麼不確定」、「把缺口變成問題」。
+description: 把 REA 或資料庫掃描結果中的 unknowns、limitations、低信心結論，整理成可以直接拿去訪談的問題清單，並標記每題該問誰、優先級、以及答案會影響哪個決策。用在系統盤點掃描完成之後、第二輪訪談之前。觸發語：「整理 unknowns」、「inventory gaps」、「整理 unknowns」、「掃描後還有什麼不確定」、「把缺口變成問題」。
 ---
 
 # inventory-gaps
@@ -48,7 +48,7 @@ description: 把 REA 或資料庫掃描結果中的 unknowns、limitations、低
 - ...
 ```
 
-然後提示使用者：執行 `/grill-the-client` 並附上這份檔案，進入第二輪訪談。
+然後提示使用者：載入 `grill-the-client` 並附上這份檔案，進入第二輪訪談。
 
 ## 判斷準則
 

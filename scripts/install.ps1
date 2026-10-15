@@ -1,52 +1,57 @@
 # nice-kit 安裝腳本（Windows PowerShell）
+# 用法：
+#   .\scripts\install.ps1                        # 自動偵測 agent
+#   .\scripts\install.ps1 -Agents claude-code,codex
+#   .\scripts\install.ps1 -Agents '*' -SkipRea
+param(
+  [string[]]$Agents = @(),
+  [switch]$SkipRea
+)
 $ErrorActionPreference = "Stop"
+$KitDir  = Split-Path -Parent $PSScriptRoot
+$KitRepo = "ryantsai1111-cpu/nice-kit"
 
-$KitDir    = Split-Path -Parent $PSScriptRoot
-$SkillsDir = Join-Path $env:USERPROFILE ".claude\skills"
+function Say($m) { Write-Host "`n==> $m" -ForegroundColor Cyan }
+function Have($c) { [bool](Get-Command $c -ErrorAction SilentlyContinue) }
 
-function Say($msg) { Write-Host "`n==> $msg" -ForegroundColor Cyan }
-function Need($cmd) {
-  if (-not (Get-Command $cmd -ErrorAction SilentlyContinue)) {
-    Write-Error "缺少 $cmd，請先安裝。"; exit 1
-  }
-}
-
-Need node; Need npx; Need claude
-
+if (-not (Have node)) { Write-Error "缺少 node，請先安裝 Node.js 22.19+" }
 $nodeMajor = [int](node -p 'process.versions.node.split(".")[0]')
-if ($nodeMajor -lt 22) { Write-Error "Node.js 需要 22.19+ 或 24.11+，目前是 $(node -v)"; exit 1 }
+if ($nodeMajor -lt 22) { Write-Error "Node.js 需要 22.19+，目前 $(node -v)" }
 
-Say "1/4 安裝 superpowers 與 spec-kit"
-npx -y skills add obra/superpowers --agent claude-code
-if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
-  Write-Host "  安裝 uv（spec-kit 需要）"
+if ($Agents.Count -eq 0) {
+  $map = @{ claude="claude-code"; codex="codex"; cursor="cursor"; gemini="gemini-cli"; copilot="github-copilot"; opencode="opencode"; hermes="hermes-agent" }
+  $Agents = $map.Keys | Where-Object { Have $_ } | ForEach-Object { $map[$_] }
+  if ($Agents.Count -eq 0) { Write-Host "沒偵測到 agent，改裝到 universal"; $Agents = @("universal") }
+}
+$agentArgs = $Agents | ForEach-Object { "--agent", $_ }
+Say "目標 agent：$($Agents -join ',')"
+
+Say "1/5 安裝 nice-kit skills"
+npx -y skills add $KitRepo --skill '*' @agentArgs -g -y
+Say "2/5 安裝 superpowers"
+npx -y skills add obra/superpowers --skill '*' @agentArgs -g -y
+Say "3/5 安裝 planning-with-files"
+npx -y skills add OthmanAdi/planning-with-files --skill '*' @agentArgs -g -y
+
+Say "4/5 安裝 spec-kit（specify CLI）"
+if (-not (Have uv)) {
   powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
   $env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
 }
 uv tool install specify-cli
 
-Say "2/4 安裝 claude-mem plugin"
-try { claude plugin marketplace add thedotmack/claude-mem } catch {}
-try { claude plugin install claude-mem } catch {}
+if (-not $SkipRea) { Say "5/5 註冊 REA（互動式）"; npx -y rea-agents@latest setup } else { Say "5/5 略過 REA" }
 
-Say "3/4 註冊 REA（互動式：選擇 agent 後確認變更）"
-npx -y rea-agents@latest setup
-
-Say "4/4 複製本 repo 的 skills 到 $SkillsDir"
-New-Item -ItemType Directory -Force -Path $SkillsDir | Out-Null
-Get-ChildItem (Join-Path $KitDir "skills") -Directory | ForEach-Object {
-  $dest = Join-Path $SkillsDir $_.Name
-  if (Test-Path $dest) { Remove-Item $dest -Recurse -Force }
-  Copy-Item $_.FullName $dest -Recurse
-  Write-Host "  + $($_.Name)"
+if ((Have claude) -and ($Agents -contains "claude-code")) {
+  Say "（Claude Code 專屬）安裝 claude-mem"
+  try { claude plugin marketplace add thedotmack/claude-mem | Out-Null } catch {}
+  try { claude plugin install claude-mem | Out-Null } catch {}
 }
 
 Write-Host @"
 
 完成。接下來：
-  1. 重啟 Claude Code
-  2. 新專案：specify init <案名> --integration claude，再放 templates\CLAUDE.md
-  3. 執行 /grill-the-client 開始第一輪訪談
-
-資料庫 MCP 請依客戶環境另行設定，見 docs\db-mcp.md
+  1. 重啟你的 agent
+  2. 開新案：$KitDir\scripts\init.ps1 <案名> -Agents <agent>
+  3. 檢查：bash $KitDir\scripts\doctor.sh（需 Git Bash / WSL）
 "@
