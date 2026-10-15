@@ -1,4 +1,4 @@
-# enterprise-ai-kit
+# nice-kit
 
 一套給「企業 AI 導入 / 舊系統盤點」顧問案用的 Claude Code 專案骨架。
 不是另一個 skill 大全，而是**五個工具、一條流程**，開案直接跑。
@@ -26,18 +26,18 @@ grill-the-client ──► spec-kit ──► REA + DB MCP ──► superpowers
 
 ## 安裝
 
-需要 Node.js 22.19+ 與 Claude Code。
+需要 Node.js 22.19+、Claude Code；spec-kit 需要 [uv](https://docs.astral.sh/uv/)（腳本會自動裝）。
 
 ```bash
-git clone https://github.com/<you>/enterprise-ai-kit
-cd enterprise-ai-kit
+git clone https://github.com/ryantsai1111-cpu/nice-kit
+cd nice-kit
 ./scripts/install.sh        # macOS / Linux
 # 或
 .\scripts\install.ps1       # Windows PowerShell
 ```
 
 腳本會：
-1. 用 `npx skills add` 裝 superpowers、spec-kit 的 skill
+1. 裝 superpowers（skills.sh）與 spec-kit 的 `specify` CLI（uv）
 2. 安裝 claude-mem plugin
 3. 跑 `npx rea-agents setup`（互動式，會問你要註冊哪些 agent）
 4. 把本 repo 的 `skills/` 複製到 `~/.claude/skills/`
@@ -46,7 +46,11 @@ cd enterprise-ai-kit
 
 ## 開案流程
 
-把 `templates/CLAUDE.md` 複製到新專案根目錄，然後依序：
+```bash
+specify init <案名> --integration claude   # spec-kit 建立 /speckit.* 指令
+cd <案名> && cp ~/nice-kit/templates/CLAUDE.md .
+```
+然後依序：
 
 | 步驟 | 指令 | 產出 |
 |---|---|---|
@@ -62,7 +66,7 @@ cd enterprise-ai-kit
 ## 目錄
 
 ```
-enterprise-ai-kit/
+nice-kit/
 ├── README.md
 ├── LICENSE
 ├── scripts/

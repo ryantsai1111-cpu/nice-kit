@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# enterprise-ai-kit 安裝腳本（macOS / Linux）
+# nice-kit 安裝腳本（macOS / Linux）
 set -euo pipefail
 
 KIT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -17,9 +17,14 @@ if [ "$NODE_MAJOR" -lt 22 ]; then
   echo "Node.js 需要 22.19+ 或 24.11+，目前是 $(node -v)"; exit 1
 fi
 
-say "1/4 安裝 superpowers 與 spec-kit skills"
+say "1/4 安裝 superpowers 與 spec-kit"
 npx -y skills add obra/superpowers --agent claude-code
-npx -y skills add github/spec-kit --agent claude-code
+if ! command -v uv >/dev/null 2>&1; then
+  echo "  安裝 uv（spec-kit 需要）"
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  export PATH="${HOME}/.local/bin:${PATH}"
+fi
+uv tool install specify-cli
 
 say "2/4 安裝 claude-mem plugin"
 claude plugin marketplace add thedotmack/claude-mem || true
@@ -41,7 +46,7 @@ cat <<'EOF'
 
 完成。接下來：
   1. 重啟 Claude Code
-  2. 在新專案根目錄放 templates/CLAUDE.md
+  2. 新專案：specify init <案名> --integration claude，再放 templates/CLAUDE.md
   3. 執行 /grill-the-client 開始第一輪訪談
 
 資料庫 MCP 請依客戶環境另行設定，見 docs/db-mcp.md

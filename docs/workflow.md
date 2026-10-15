@@ -5,12 +5,14 @@
 ## 0. 開案
 
 ```bash
-mkdir <案名> && cd <案名>
-cp ~/enterprise-ai-kit/templates/CLAUDE.md .
-mkdir -p .grill specs inventory
-git init
+specify init <案名> --integration claude   # 建立 .specify/ 與 /speckit.* 指令
+cd <案名>
+cp ~/nice-kit/templates/CLAUDE.md .
+mkdir -p .grill inventory
 claude
 ```
+
+spec-kit 是每個專案各自 init，不是全域 skill。`--script ps` 可強制用 PowerShell 腳本。
 
 填 CLAUDE.md 裡的 `<>`。只填知道的，不知道的留著，第 1 步會問出來。
 

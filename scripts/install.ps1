@@ -1,4 +1,4 @@
-# enterprise-ai-kit 安裝腳本（Windows PowerShell）
+# nice-kit 安裝腳本（Windows PowerShell）
 $ErrorActionPreference = "Stop"
 
 $KitDir    = Split-Path -Parent $PSScriptRoot
@@ -16,9 +16,14 @@ Need node; Need npx; Need claude
 $nodeMajor = [int](node -p 'process.versions.node.split(".")[0]')
 if ($nodeMajor -lt 22) { Write-Error "Node.js 需要 22.19+ 或 24.11+，目前是 $(node -v)"; exit 1 }
 
-Say "1/4 安裝 superpowers 與 spec-kit skills"
+Say "1/4 安裝 superpowers 與 spec-kit"
 npx -y skills add obra/superpowers --agent claude-code
-npx -y skills add github/spec-kit --agent claude-code
+if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
+  Write-Host "  安裝 uv（spec-kit 需要）"
+  powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+  $env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
+}
+uv tool install specify-cli
 
 Say "2/4 安裝 claude-mem plugin"
 try { claude plugin marketplace add thedotmack/claude-mem } catch {}
@@ -40,7 +45,7 @@ Write-Host @"
 
 完成。接下來：
   1. 重啟 Claude Code
-  2. 在新專案根目錄放 templates\CLAUDE.md
+  2. 新專案：specify init <案名> --integration claude，再放 templates\CLAUDE.md
   3. 執行 /grill-the-client 開始第一輪訪談
 
 資料庫 MCP 請依客戶環境另行設定，見 docs\db-mcp.md
