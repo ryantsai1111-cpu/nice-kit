@@ -2,103 +2,95 @@
 
 [繁體中文](../../README.md) · [English](README_en.md) · [简体中文](README_zh.md) · **日本語**
 
-「企業への AI 導入／レガシーシステム棚卸し」コンサル案件向けのプロジェクト骨格です。
-**特定の agent に縛られません**：Claude Code、Codex、Cursor、Gemini CLI、Copilot、OpenCode、Hermes で使えます。
-skill の寄せ集めではなく、**5 つのツールと 1 本のワークフロー**。案件初日からそのまま回せます。
+AI エージェントで開発するためのプロジェクト骨格：**コア層＋ドメインパック**。
+**特定のエージェントに依存しない**：Claude Code、Codex、Cursor、Gemini CLI、Copilot、OpenCode、Hermes で動く。
+スキル集ではない。売りは一文：**どのエージェントを使っても、何を作っても、プロジェクト開始の最初の 10 分は同じになる。**
 
 ```
-grill-the-client ──► spec-kit ──► REA + DB MCP ──► superpowers
-  (インタビュー)        (仕様)         (棚卸し)          (実装)
-             └──── PROGRESS.md + planning-with-files（セッション横断の記憶）────┘
+                    ┌──────────── コア（全プロジェクト）────────────┐
+                    │ spec-kit ──► superpowers ──► check.sh       │
+                    │  (仕様)       (実装)         (納品前)         │
+                    │ Context7 + Playwright MCP   PROGRESS.md     │
+                    │  (ドキュメント) (ブラウザ)    (セッション間)   │
+                    └─────────────────┬───────────────────────────┘
+                                      │ init.sh -p <pack>
+        ┌─────────────────────────────┴──────────────────────────────┐
+        │ legacy-consulting                │ web-app                  │
+        │ ヒアリング → 棚卸し → 補完 → 挙動固定 │ 仕様 → E2E 受入 → 実装    │
+        └──────────────────────────────────┴──────────────────────────┘
 ```
 
-## なぜ 5 つだけか
+## なぜ二層か
 
-skill はすべて agent とコンテキストを奪い合います。入れすぎると遅くなり、互いに干渉します。
-選定基準は 3 つ：**高頻度で使う、ドメイン知識が要る、間違えると高くつく**。3 つ全部満たしたものだけ入れています。
+スキルはすべてエージェントとコンテキストを奪い合う。入れすぎると遅くなり、互いに干渉する。
+選定基準は三つだけ：**高頻度で使う、ドメイン知識が要る、間違えると高くつく**。三つ全部満たすものだけ入れる。
 
-| 段階 | ツール | 解決する問題 | 出典 |
+- **コア**：何を作っていても三つ全部満たすもの。七つ。うち三つは MCP サーバーかスクリプトで、エージェントのコンテキストを消費しない。
+- **パック**：特定ドメインでのみ三つ全部満たすもの。プロジェクト開始時に `-p` で一つ選ぶ。選ばなければコアのみ。
+
+### コア
+
+| 役割 | ツール | 解決する問題 | 出典 |
 |---|---|---|---|
-| インタビュー | `grill-the-client`（本 repo） | 文書に書かれておらず、ベテラン社員しか知らないこと | [mattpocock grill-me](https://github.com/mattpocock/skills) を改変 |
-| 仕様 | [spec-kit](https://github.com/github/spec-kit) | 範囲を明文化せずに着手してしまう | GitHub 公式 |
-| 棚卸し | [REA](https://github.com/morluto/rea) | ソースコードのないシステム（.NET / Electron / APK / パケット） | MIT |
-| 棚卸し | データベース MCP server | 読み取り専用アカウントで schema を直接読む。逆コンパイルより速い | 顧客の DB に合わせて選定 |
-| 実装 | [superpowers](https://github.com/obra/superpowers) | agent が考える前にコードを書いてしまう | Anthropic 公式 marketplace |
-| 記憶 | `PROGRESS.md` + [planning-with-files](https://github.com/OthmanAdi/planning-with-files) | 案件は数週間続く。毎回説明し直したくない | 全 agent 共通。Claude Code は [claude-mem](https://github.com/thedotmack/claude-mem) を追加 |
-| 補完 | `inventory-gaps`（本 repo） | REA の unknowns をインタビュー質問に変換 | オリジナル |
+| 仕様 | [spec-kit](https://github.com/github/spec-kit) | スコープを書く前に着手してしまう | GitHub 公式 |
+| 実装規律 | [superpowers](https://github.com/obra/superpowers) | 考える前にコードを書くエージェント | Anthropic 公式 marketplace |
+| ドキュメント参照 | [Context7 MCP](https://github.com/upstash/context7) | 記憶で存在しない API を書く | Upstash |
+| ブラウザ | [Playwright MCP](https://github.com/microsoft/playwright-mcp) | ビルドが通っただけで画面を開いていない | Microsoft 公式 |
+| 納品前 | `scripts/check.sh`（本 repo）+ [gitleaks](https://github.com/gitleaks/gitleaks) | シークレットの混入、テスト未実行、進捗未記録 | オリジナル + MIT |
+| 記憶 | `PROGRESS.md` + [planning-with-files](https://github.com/OthmanAdi/planning-with-files) | 数週間の案件で毎回説明し直す | 全エージェント共通；Claude Code は [claude-mem](https://github.com/thedotmack/claude-mem) を追加 |
+| ルール | `templates/AGENTS.md`（本 repo） | 七種のエージェントがそれぞれ別の設定を読む | AGENTS.md 一つに CLAUDE.md / GEMINI.md / `.cursor/rules` が向く |
+
+### パック
+
+| pack | 用途 | 追加されるもの |
+|---|---|---|
+| [legacy-consulting](../../packs/legacy-consulting/) | 企業 AI 導入、レガシーシステム棚卸しのコンサル案件 | `grill-the-client`（ヒアリング）、[REA](https://github.com/morluto/rea) + DB MCP（棚卸し）、`inventory-gaps`（補完）、`characterization-tests`（挙動固定）、データ機密区分とローカル/クラウド分担ルール |
+| [web-app](../../packs/web-app/) | Web アプリ開発 | `e2e-from-spec`（仕様 → Playwright 受入テスト）、画面を実際に見るルール |
+
+自分のパックを作る：[docs/packs.md](../packs.md)。
 
 ## インストール
 
-Node.js 22.19+ と、少なくとも 1 つの agent CLI が必要です。spec-kit には [uv](https://docs.astral.sh/uv/) が必要（スクリプトが自動で入れます）。
+Node.js 22.19+ と最低一つのエージェント CLI が必要。spec-kit は [uv](https://docs.astral.sh/uv/) を使う（スクリプトが自動で入れる）。
 
-**skills だけ（任意の agent）：**
 ```bash
-npx skills add ryantsai1111-cpu/nice-kit --agent codex -g      # 自分の agent に置き換え
-```
+npx skills add ryantsai1111-cpu/nice-kit --agent codex -g      # スキルだけ
 
-**フルインストール（skills + superpowers + spec-kit + REA + 記憶）：**
-```bash
 git clone https://github.com/ryantsai1111-cpu/nice-kit && cd nice-kit
-./scripts/install.sh                      # インストール済み agent を自動検出
-./scripts/install.sh -a claude-code,codex # または指定
-.\scripts\install.ps1                     # Windows
-./scripts/doctor.sh                       # 確認
+./scripts/install.sh                        # コアのみ
+./scripts/install.sh -p legacy-consulting   # コア + パック
+./scripts/install.sh --list-packs
+.\scripts\install.ps1 -Packs web-app        # Windows
+./scripts/doctor.sh
 ```
 
-agent 識別子と各ツールの対応状況は [docs/agents.md](../agents.md)。
-データベース MCP server は顧客環境ごとに異なります：[docs/db-mcp.md](../db-mcp.md)。
+MCP は Claude Code / Codex / Gemini CLI で自動登録。他のエージェントには貼り付け用の設定片を表示する。[docs/mcp.md](../mcp.md) 参照。
 
-## 案件の開始
+## プロジェクト開始
 
 ```bash
-./scripts/init.sh <案件名>                  # specify init を実行し AGENTS.md 等を配置
-./scripts/init.sh <案件名> -a codex,cursor  # 複数 agent
-```
-その後、順番に（slash command の書き方は agent によって少し違います。docs/agents.md 参照）：
-
-| 手順 | 起動方法 | 成果物 |
-|---|---|---|
-| 1 | `grill-the-client` を読み込む（または「顧客にインタビュー」と言う） | `.grill/<日付>-<テーマ>.md` インタビュー記録 |
-| 2 | spec-kit：constitution → specify → clarify | `specs/` 範囲と制約 |
-| 3 | 「REA で `<パス>` を棚卸しし、unknowns を全部列挙して」 | 棚卸しレポート + unknowns 一覧 |
-| 4 | `inventory-gaps` を読み込む（または「unknowns を整理」と言う） | 第 2 回インタビューの質問 |
-| 5 | spec-kit：plan → tasks | タスク一覧 |
-| 6 | superpowers が実装を引き継ぐ | コード + テスト |
-
-詳細は [docs/workflow.md](../workflow.md)。
-
-## ディレクトリ構成
-
-```
-nice-kit/
-├── README.md
-├── LICENSE
-├── scripts/
-│   ├── install.sh / .ps1      # 複数 agent 対応インストール
-│   ├── init.sh / .ps1         # 新規案件の開始
-│   └── doctor.sh              # インストール確認
-├── templates/
-│   ├── AGENTS.md              # プロジェクト規約の正本（全 agent が読む）
-│   ├── CLAUDE.md / GEMINI.md  # 1 行だけ：@AGENTS.md
-│   ├── .cursor/rules/         # Cursor が AGENTS.md を参照
-│   └── PROGRESS.md            # セッション横断の記憶
-├── docs/
-│   ├── workflow.md            # 6 ステップの詳細
-│   ├── agents.md              # 対応表と名称マッピング
-│   ├── db-mcp.md              # データベース MCP の選定
-│   ├── legal.md               # ライセンスとセキュリティの前提
-│   └── readme/                # 翻訳
-└── skills/
-    ├── grill-the-client/SKILL.md
-    └── inventory-gaps/SKILL.md
+./scripts/init.sh <名前>                          # コアのテンプレート
+./scripts/init.sh <名前> -p legacy-consulting     # パックのルールとディレクトリを追加
+./scripts/init.sh <名前> -p web-app -a codex,cursor
 ```
 
-## 法的・セキュリティ上の前提
+| 手順 | コア | legacy-consulting の追加 | web-app の追加 |
+|---|---|---|---|
+| 0 | AGENTS.md の `<>` を埋める | | |
+| 1 | | `grill-the-client` ヒアリング → `.grill/` | |
+| 2 | spec-kit：constitution → specify → clarify | | |
+| 3 | | REA / DB MCP 棚卸し → `inventory-gaps` → 再ヒアリング | |
+| 4 | spec-kit：plan → tasks | | |
+| 5 | | `characterization-tests` で旧システムの挙動を記録 | `e2e-from-spec` で受入テストを書く（まず赤） |
+| 6 | superpowers で実装 | characterization テスト通過が完了条件 | e2e が緑になれば完了 |
+| 7 | `check.sh` 納品前チェック | | |
 
-REA で解析できるのは、あなたが**所有しているか、検査を許可された**ソフトウェアだけです。商用 ERP のライセンスは逆コンパイルを禁じていることが多いです。
-契約書に「顧客が自社システムの解析を許可する」旨を明記し、解析はすべて顧客の設備内で行ってください。
-詳細：[docs/legal.md](../legal.md)。
+各パックの詳細はそれぞれの README と docs を参照。
+
+## 法務・セキュリティ前提
+
+legacy-consulting の REA は**所有または分析許可のある**ソフトウェアにのみ使える。詳細：[packs/legacy-consulting/docs/legal.md](../../packs/legacy-consulting/docs/legal.md)。
 
 ## ライセンス
 
-MIT。上流ツールはそれぞれのライセンスに従います。
+MIT。上流ツールはそれぞれのライセンスに従う。

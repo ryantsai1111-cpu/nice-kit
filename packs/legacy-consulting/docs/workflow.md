@@ -1,16 +1,17 @@
-# 六步流程
+# legacy-consulting 流程
 
 每一步的輸入、輸出、以及「什麼時候算做完」。階段之間不跳。
+核心層的規格 / 計畫 / 實作 / 交付前檢查是所有專案共通的；本 pack 在前後插入訪談、盤點、補缺、行為封存。
 
 ## 0. 開案
 
 ```bash
-~/nice-kit/scripts/init.sh <案名> -a <agent,agent,...>
+~/nice-kit/scripts/init.sh <案名> -p legacy-consulting -a <agent,agent,...>
 cd <案名>
 ```
 
 init 會跑 `specify init`（每個 agent 一份 spec-kit 指令）、放入 AGENTS.md / CLAUDE.md / GEMINI.md /
-`.cursor/rules` / PROGRESS.md、建 `.grill/` 與 `inventory/`。
+`.cursor/rules` / PROGRESS.md，把本 pack 的「領域規範」接在 AGENTS.md 後面，建 `.grill/` 與 `inventory/`。
 
 填 AGENTS.md 裡的 `<>`。只填知道的，不知道的留著，第 1 步會問出來。
 CLAUDE.md 和 GEMINI.md 只是 `@AGENTS.md`，不要另外改。
@@ -31,7 +32,7 @@ speckit.constitution   # 不變的原則：資料不出機房、唯讀優先、�
 speckit.specify        # 這次要做什麼、不做什麼，從 .grill/ 的共識流程來
 speckit.clarify        # 把 specify 裡模糊的地方問清楚
 ```
-（Claude / Gemini / Copilot 前面加 `/`，Codex 加 `$`，無 slash 的 agent 用自然語言；見 docs/agents.md）
+（Claude / Gemini / Copilot 前面加 `/`，Codex 加 `$`，無 slash 的 agent 用自然語言；見 nice-kit 的 docs/agents.md）
 
 - **輸出**：`specs/constitution.md`、`specs/<feature>/spec.md`
 - **做完的定義**：spec 裡沒有「待確認」；每條需求都能回溯到某個 `.grill/` 檔。
@@ -48,6 +49,12 @@ speckit.clarify        # 把 specify 裡模糊的地方問清楚
 ```
 用 REA 分析 <路徑>。目標：<spec 裡的某條需求>。
 每個結論附 evidence，結尾列出所有 unknowns 與 limitations。
+```
+
+只有網頁可登入、沒有安裝檔也沒有 DB 帳號：
+```
+用 Playwright MCP 登入 <網址>，走完 <spec 裡的某條流程>，側錄每一個 request 的 method、路徑、參數與回應結構。
+不要送出任何會寫入資料的表單；遇到就停下來問。
 ```
 
 資料庫：
@@ -83,12 +90,24 @@ speckit.tasks    # 拆成任務，每個任務可獨立驗收
 - **輸出**：`specs/<feature>/plan.md`、`tasks.md`
 - **做完的定義**：每個任務都有驗收條件，且能對應到敏感度分類表。
 
+## 5.5 行為封存 characterization-tests
+
+```
+載入 characterization-tests，輸入 inventory/report.md 與 specs/<feature>/spec.md
+```
+
+- **輸出**：`tests/characterization/`（案例、golden 輸出、harness、README）
+- **做完的定義**：每個要替換的邊界都有一組測試，連跑兩次結果相同；看起來不對的輸出已列進「待確認」並轉給 inventory-gaps。
+- **為什麼在實作前**：這是新系統的驗收基準。實作後才錄，就是在用新系統的輸出考新系統。
+- 只在「要替換舊系統的某段」時做；純盤點案跳過。
+
 ## 6. 實作 superpowers
 
 superpowers 裝好後會自動介入：brainstorm → 寫 plan → TDD → 子 agent 執行。
-你要做的只有兩件事：
+你要做的只有三件事：
 - 每個任務開始前確認它在 spec 範圍內
 - 涉及寫入資料庫的任務，一律加人工核准步驟
+- 有 characterization tests 的邊界，以它通過為任務完成
 
 ## 貫穿全程：記憶
 
@@ -98,12 +117,21 @@ superpowers 裝好後會自動介入：brainstorm → 寫 plan → TDD → 子 a
 
 案子拖三週回來，換一個 agent 也能接。
 
+## 交付前
+
+```bash
+~/nice-kit/scripts/check.sh
+```
+
+掃 secret、跑測試（含 characterization）、確認 PROGRESS.md 有更新。
+
 ## 結案交付
 
 ```
 inventory/report.md            盤點報告
 inventory/tool-layer-draft.md  tool 介面草稿（若在範圍內）
 specs/                         合約依據
+tests/characterization/        舊系統行為基準（若有替換）
 .grill/                        訪談紀錄 = 稽核軌跡
 ```
 

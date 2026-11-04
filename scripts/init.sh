@@ -1,33 +1,28 @@
 #!/usr/bin/env bash
-# 開新案：建立專案目錄、跑 spec-kit init、放入 agent 設定檔
+# 開新案：建立專案目錄、跑 spec-kit init、放入 agent 設定檔，依 pack 附加領域規範
 #
 # 用法：
-#   ./scripts/init.sh <案名> [-a claude-code,codex,cursor,...]
+#   ./scripts/init.sh <案名> [-p pack] [-a claude-code,codex,cursor,...]
 #
-# -a 省略時會自動偵測。spec-kit 的 --integration 名稱與 skills CLI 不同，
-# 這裡自動對照（表在 docs/agents.md）。
+# -p 省略：只放核心範本（任何專案都適用）。
+# -a 省略：自動偵測。spec-kit 的 --integration 名稱與 skills CLI 不同，這裡自動對照（表在 docs/agents.md）。
 set -euo pipefail
+. "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
-KIT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 NAME="${1:-}"; shift || true
-AGENTS=""
+AGENTS=""; PACK=""
 while [ $# -gt 0 ]; do
   case "$1" in
     -a|--agents) AGENTS="$2"; shift 2 ;;
+    -p|--pack)   PACK="$2"; shift 2 ;;
     *) echo "未知參數 $1"; exit 1 ;;
   esac
 done
-[ -n "$NAME" ] || { echo "用法：init.sh <案名> [-a agents]"; exit 1; }
-have() { command -v "$1" >/dev/null 2>&1; }
+[ -n "$NAME" ] || { echo "用法：init.sh <案名> [-p pack] [-a agents]"; exit 1; }
 have specify || { echo "缺少 specify，請先跑 scripts/install.sh"; exit 1; }
+[ -z "$PACK" ] || load_pack "$PACK"
 
-if [ -z "$AGENTS" ]; then
-  d=()
-  have claude && d+=(claude-code); have codex && d+=(codex); have cursor && d+=(cursor)
-  have gemini && d+=(gemini-cli); have copilot && d+=(github-copilot); have opencode && d+=(opencode)
-  [ ${#d[@]} -gt 0 ] || d=(claude-code)
-  AGENTS="$(IFS=,; echo "${d[*]}")"
-fi
+[ -n "$AGENTS" ] || AGENTS="$(detect_agents claude-code)"
 
 # skills CLI 名稱 → spec-kit --integration 名稱
 to_speckit() {
@@ -64,20 +59,43 @@ for a in "${arr[@]:1}"; do
   specify init --here --integration "$sk" --ignore-agent-tools --force >/dev/null 2>&1 || true
 done
 
-echo "==> 放入 nice-kit 範本"
+echo "==> 放入 nice-kit 核心範本"
 cp "$KIT_DIR/templates/AGENTS.md" .
 cp "$KIT_DIR/templates/CLAUDE.md" .
 cp "$KIT_DIR/templates/GEMINI.md" .
 cp "$KIT_DIR/templates/PROGRESS.md" .
 mkdir -p .cursor/rules && cp "$KIT_DIR/templates/.cursor/rules/nice-kit.mdc" .cursor/rules/
-mkdir -p .grill inventory
 [ -d .git ] || git init -q
-printf '.grill/\ninventory/\n.env\n' >> .gitignore
+printf '.env\n.env.*\n' >> .gitignore
+
+if [ -n "$PACK" ]; then
+  echo "==> 附加 pack：$PACK"
+  # 領域規範接在 AGENTS.md 後面；其他 pack 範本直接複製
+  if [ -f "$PACK_DIR/templates/AGENTS.pack.md" ]; then
+    { echo; cat "$PACK_DIR/templates/AGENTS.pack.md"; } >> AGENTS.md
+  fi
+  if [ -d "$PACK_DIR/templates" ]; then
+    find "$PACK_DIR/templates" -type f ! -name 'AGENTS.pack.md' -print0 \
+      | while IFS= read -r -d '' f; do
+          rel="${f#"$PACK_DIR"/templates/}"; mkdir -p "$(dirname "$rel")"; cp "$f" "$rel"
+        done
+  fi
+  if [ -n "$PACK_INIT_DIRS" ]; then
+    IFS=',' read -ra dirs <<< "$PACK_INIT_DIRS"; mkdir -p "${dirs[@]}"
+  fi
+  if [ -n "$PACK_GITIGNORE" ]; then
+    IFS=',' read -ra ign <<< "$PACK_GITIGNORE"; printf '%s\n' "${ign[@]}" >> .gitignore
+  fi
+  printf 'pack: %s\n' "$PACK" > .nice-kit
+  run_pack_hook "$PACK" init
+else
+  printf 'pack: none\n' > .nice-kit
+fi
 
 cat <<EOF
 
-專案 $NAME 已建立。agent：$AGENTS
+專案 $NAME 已建立。agent：$AGENTS${PACK:+，pack：$PACK}
   1. 填 AGENTS.md 裡的 <>（只填知道的）
   2. 用你的 agent 開啟這個目錄
-  3. 載入 grill-the-client skill 開始第一輪訪談
+  3. 從 spec-kit 的 constitution 開始${PACK:+；pack 的流程見 ${KIT_DIR}/packs/$PACK/README.md}
 EOF
