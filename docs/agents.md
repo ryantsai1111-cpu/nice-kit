@@ -8,15 +8,19 @@ nice-kit 以 [Agent Skills 開放格式](https://agentskills.io) 為核心，
 
 | 元件 | Claude Code | Codex | Cursor | Gemini CLI | Copilot | OpenCode | Hermes | 其他 |
 |---|---|---|---|---|---|---|---|---|
-| grill-the-client / inventory-gaps（skill） | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ 任何讀 `.agents/skills` 或 `SKILL.md` 的 agent |
-| superpowers（skill） | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **核心** | | | | | | | | |
+| superpowers（skill） | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ 任何讀 `.agents/skills` 或 `SKILL.md` 的 agent |
 | planning-with-files（記憶，skill） | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | spec-kit（slash command） | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | windsurf, roo, kilocode, qwen, amp, codebuddy, q, auggie… |
-| REA（MCP） | ✓ | ✓ | ✓ | ✓ | ✗ 手動 | ✓ | ✓ 手動 | 任何支援本機 MCP server 的 agent |
+| Context7 / Playwright（MCP） | ✓ 自動 | ✓ 自動 | 手動 | ✓ 自動 | 手動 | 手動 | 手動 | 任何支援本機 MCP server 的 agent，見 docs/mcp.md |
+| check.sh / gitleaks | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 跟 agent 無關，純 shell |
+| **pack** | | | | | | | | |
+| pack 的 skill（grill-the-client、e2e-from-spec…） | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| REA（MCP，legacy-consulting） | ✓ | ✓ | ✓ | ✓ | ✗ 手動 | ✓ | ✓ 手動 | 任何支援本機 MCP server 的 agent |
 | claude-mem（自動記憶） | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | Claude 專屬，其他 agent 用 PROGRESS.md + planning-with-files |
 | AGENTS.md（專案規範） | 經 CLAUDE.md `@AGENTS.md` | ✓ 原生 | 經 `.cursor/rules` | 經 GEMINI.md | ✓ 原生 | ✓ 原生 | ✓ 原生 | 多數 agent 原生讀 AGENTS.md |
 
-「手動」表示該工具的 setup 不會自動註冊，要自己把 MCP 設定貼進 agent 的 config。
+「手動」表示安裝腳本不會自動註冊，會印出設定片段讓你貼進 agent 的 config（位置見 docs/mcp.md）。
 
 ## 名稱對照
 
@@ -50,21 +54,21 @@ spec-kit 產生的指令在各 agent 的呼叫方式：
 | Cursor | `/speckit.specify`（agent mode） |
 | Hermes、其他無 slash 的 agent | 自然語言：「依照 spec-kit 的 specify 流程寫 spec」 |
 
-nice-kit 自己的 skill 沒有 slash command 依賴。說「訪談客戶」「整理 unknowns」就會觸發；
+nice-kit 自己的 skill 沒有 slash command 依賴。說「訪談客戶」「從 spec 寫 e2e」就會觸發；
 有 slash 的 agent 也可以 `/grill-the-client`。
 
 ## 只用一個 agent 的話
 
 ```bash
-./scripts/install.sh -a codex
-./scripts/init.sh 案名 -a codex
+./scripts/install.sh -a codex -p web-app
+./scripts/init.sh 案名 -a codex -p web-app
 ```
 
 ## 同時用好幾個
 
 ```bash
-./scripts/install.sh -a claude-code,codex,cursor
-./scripts/init.sh 案名 -a claude-code,codex,cursor
+./scripts/install.sh -a claude-code,codex,cursor -p legacy-consulting
+./scripts/init.sh 案名 -a claude-code,codex,cursor -p legacy-consulting
 ```
 
 skills 會裝到每個 agent 的目錄；spec-kit 會為每個 agent 各產一份指令；
