@@ -26,7 +26,7 @@ if ($Agents.Count -eq 0) {
 $agentArgs = $Agents | ForEach-Object { "--agent", $_ }
 Say "目標 agent：$($Agents -join ',')"
 
-Say "1/5 安裝 nice-kit skills"
+Say "1/5 安裝 nice-kit skills（grill-the-client、inventory-gaps、ambition-pass）"
 npx -y skills add $KitRepo --skill '*' @agentArgs -g -y
 Say "2/5 安裝 superpowers"
 npx -y skills add obra/superpowers --skill '*' @agentArgs -g -y

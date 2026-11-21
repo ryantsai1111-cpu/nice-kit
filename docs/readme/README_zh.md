@@ -59,11 +59,11 @@ agent 标识符与各工具兼容情况见 [docs/agents.md](../agents.md)。
 | 步骤 | 怎么触发 | 产出 |
 |---|---|---|
 | 1 | 加载 `grill-the-client`（或说「访谈客户」） | `.grill/<日期>-<主题>.md` 访谈记录 |
-| 2 | spec-kit：constitution → specify → clarify | `specs/` 范围与约束 |
+| 2 | spec-kit：constitution → specify → clarify（specify 前先跑 `ambition-pass`） | `specs/` 范围与约束 |
 | 3 | 「用 REA 盘点 `<路径>`，列出所有 unknowns」 | 盘点报告 + unknowns 清单 |
 | 4 | 加载 `inventory-gaps`（或说「整理 unknowns」） | 第二轮访谈问题 |
 | 5 | spec-kit：plan → tasks | 任务清单 |
-| 6 | superpowers 自动接手实现 | 代码 + 测试 |
+| 6 | 每个任务先 `ambition-pass`，再交 superpowers 实现 | 代码 + 测试 |
 
 完整说明见 [docs/workflow.md](../workflow.md)。
 
@@ -89,6 +89,7 @@ nice-kit/
 │   ├── legal.md               # 授权与安全前提
 │   └── readme/                # 翻译
 └── skills/
+    ├── ambition-pass/SKILL.md
     ├── grill-the-client/SKILL.md
     └── inventory-gaps/SKILL.md
 ```

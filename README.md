@@ -59,11 +59,11 @@ agent 識別碼與各工具的相容狀況見 [docs/agents.md](docs/agents.md)�
 | 步驟 | 怎麼觸發 | 產出 |
 |---|---|---|
 | 1 | 載入 `grill-the-client`（或說「訪談客戶」） | `.grill/<日期>-<主題>.md` 訪談紀錄 |
-| 2 | spec-kit：constitution → specify → clarify | `specs/` 範圍與限制 |
+| 2 | spec-kit：constitution → specify → clarify（specify 前先跑 `ambition-pass`） | `specs/` 範圍與限制 |
 | 3 | 「用 REA 盤點 `<路徑>`，列出所有 unknowns」 | 盤點報告 + unknowns 清單 |
 | 4 | 載入 `inventory-gaps`（或說「整理 unknowns」） | 第二輪訪談題目 |
 | 5 | spec-kit：plan → tasks | 任務清單 |
-| 6 | superpowers 自動接手實作 | 程式碼 + 測試 |
+| 6 | 每個任務先 `ambition-pass`，再交 superpowers 實作 | 程式碼 + 測試 |
 
 完整說明見 [docs/workflow.md](docs/workflow.md)。
 
@@ -89,6 +89,7 @@ nice-kit/
 │   ├── legal.md               # 授權與資安前提
 │   └── readme/                # 其他語言的 README
 └── skills/
+    ├── ambition-pass/SKILL.md
     ├── grill-the-client/SKILL.md
     └── inventory-gaps/SKILL.md
 ```
