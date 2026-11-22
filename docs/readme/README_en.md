@@ -59,11 +59,11 @@ Then, in order (slash-command syntax varies slightly by agent; see docs/agents.m
 | Step | How to trigger | Output |
 |---|---|---|
 | 1 | Load `grill-the-client` (or say "interview the client") | `.grill/<date>-<topic>.md` interview record |
-| 2 | spec-kit: constitution → specify → clarify | `specs/` scope and constraints |
+| 2 | spec-kit: constitution → specify → clarify (run `ambition-pass` before specify) | `specs/` scope and constraints |
 | 3 | "Use REA to inventory `<path>`, list every unknown" | Inventory report + unknowns list |
 | 4 | Load `inventory-gaps` (or say "organise the unknowns") | Second-round interview questions |
 | 5 | spec-kit: plan → tasks | Task list |
-| 6 | superpowers takes over implementation | Code + tests |
+| 6 | Run `ambition-pass` on each task, then superpowers takes over implementation | Code + tests |
 
 Full walkthrough: [docs/workflow.md](../workflow.md).
 
@@ -89,6 +89,7 @@ nice-kit/
 │   ├── legal.md               # licensing and security prerequisites
 │   └── readme/                # translations
 └── skills/
+    ├── ambition-pass/SKILL.md
     ├── grill-the-client/SKILL.md
     └── inventory-gaps/SKILL.md
 ```

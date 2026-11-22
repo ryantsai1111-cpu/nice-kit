@@ -35,6 +35,7 @@ check_skill() {
 }
 check_skill grill-the-client
 check_skill inventory-gaps
+check_skill ambition-pass
 check_skill planning-with-files
 # superpowers 是一組 skill，抓其中一個代表
 for d in ~/.claude/skills ~/.codex/skills ~/.cursor/skills ~/.gemini/skills ~/.config/agents/skills ~/.agents/skills; do

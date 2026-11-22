@@ -59,11 +59,11 @@ agent 識別子と各ツールの対応状況は [docs/agents.md](../agents.md)�
 | 手順 | 起動方法 | 成果物 |
 |---|---|---|
 | 1 | `grill-the-client` を読み込む（または「顧客にインタビュー」と言う） | `.grill/<日付>-<テーマ>.md` インタビュー記録 |
-| 2 | spec-kit：constitution → specify → clarify | `specs/` 範囲と制約 |
+| 2 | spec-kit：constitution → specify → clarify（specify の前に `ambition-pass`） | `specs/` 範囲と制約 |
 | 3 | 「REA で `<パス>` を棚卸しし、unknowns を全部列挙して」 | 棚卸しレポート + unknowns 一覧 |
 | 4 | `inventory-gaps` を読み込む（または「unknowns を整理」と言う） | 第 2 回インタビューの質問 |
 | 5 | spec-kit：plan → tasks | タスク一覧 |
-| 6 | superpowers が実装を引き継ぐ | コード + テスト |
+| 6 | 各タスクで先に `ambition-pass`、その後 superpowers が実装を引き継ぐ | コード + テスト |
 
 詳細は [docs/workflow.md](../workflow.md)。
 
@@ -89,6 +89,7 @@ nice-kit/
 │   ├── legal.md               # ライセンスとセキュリティの前提
 │   └── readme/                # 翻訳
 └── skills/
+    ├── ambition-pass/SKILL.md
     ├── grill-the-client/SKILL.md
     └── inventory-gaps/SKILL.md
 ```

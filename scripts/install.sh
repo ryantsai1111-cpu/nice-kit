@@ -55,7 +55,7 @@ for a in "${arr[@]}"; do AGENT_FLAGS+=(--agent "$a"); done
 say "目標 agent：$AGENTS"
 
 # ── 1. skills（全域安裝）────────────────────────────────────────
-say "1/5 安裝 nice-kit 自己的 skills（grill-the-client、inventory-gaps）"
+say "1/5 安裝 nice-kit 自己的 skills（grill-the-client、inventory-gaps、ambition-pass）"
 npx -y skills add "$KIT_REPO" --skill '*' "${AGENT_FLAGS[@]}" -g -y
 
 say "2/5 安裝 superpowers（實作紀律）"

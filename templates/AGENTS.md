@@ -22,13 +22,14 @@
 | 階段 | 怎麼觸發 | 產出位置 |
 |---|---|---|
 | 訪談 | 載入 `grill-the-client` skill（或說「訪談客戶」） | `.grill/` |
-| 規格 | spec-kit：constitution → specify → clarify | `specs/` |
+| 規格 | spec-kit：constitution → specify → clarify（`specify` 前先載入 `ambition-pass`） | `specs/` |
 | 盤點 | REA MCP / DB MCP | `inventory/` |
 | 補缺 | 載入 `inventory-gaps` skill，再回到訪談 | `.grill/gaps-*.md` |
 | 計畫 | spec-kit：plan → tasks | `specs/` |
-| 實作 | superpowers 流程（brainstorm → plan → TDD） | `src/` |
+| 實作 | 每個任務先載入 `ambition-pass`，再進 superpowers（brainstorm → plan → TDD） | `src/` |
 
 階段之間不跳。規格沒 clarify 完不盤點，盤點沒補缺不做計畫。
+`specify` 之前，以及把任務交給 superpowers 之前，先載入 `ambition-pass`（做深，不做大；改寫後不大於原文）。
 各 agent 的 slash command 名稱不同（Claude 是 `/speckit.specify`，Codex 是 `$speckit.specify`，有些 agent 用自然語言），見 `docs/agents.md`。
 
 ## 證據規則
@@ -36,6 +37,7 @@
 - 每個關於客戶系統的結論都要附來源：REA 的 evidence 區塊、DB schema 查詢、或 `.grill/` 訪談紀錄的檔名。
 - 沒有來源的結論寫成「推測」，不寫成事實。
 - 盤點報告的每一節末尾列出「未知項」，不准省略。
+- 盤點結論不准自評。每一條（例如「表 X 沒人用」、「預存程序 Y 寫入 Z」、敏感度等級）都要附一條唯讀驗證查詢或產物及其結果（例如近 90 天寫入次數、`sys.sql_expression_dependencies` 相依查詢、grep 命中）。結果若與結論不符，退回未知項，交給 `inventory-gaps`。只准唯讀，不准對客戶資料庫執行寫入。
 
 ## 資料敏感度
 
@@ -56,7 +58,8 @@
 ## 不要做的事
 
 - 不要在訪談階段提解決方案。
-- 不要對生產資料庫執行任何非 SELECT 語句。
+- 不要對生產資料庫執行任何非 SELECT 語句。不准對客戶資料庫執行寫入。
+- 不要自評盤點結論。沒有唯讀驗證、或驗證結果與結論不符的，退回未知項。
 - 不要在未確認授權前反編譯商用軟體；授權依據見 nice-kit 的 `docs/legal.md`。
 - 不要把受訪者姓名寫進任何產出。
 

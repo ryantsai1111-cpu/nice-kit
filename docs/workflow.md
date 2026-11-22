@@ -26,9 +26,12 @@ CLAUDE.md 和 GEMINI.md 只是 `@AGENTS.md`，不要另外改。
 
 ## 2. 規格 spec-kit
 
+`speckit.specify` 之前，先對這次的任務說明載入 `ambition-pass`。
+三輪（高度、深度、廣度）跑完再改寫，改寫後不得比原文更大。一句話就能答的小事跳過。
+
 ```
 speckit.constitution   # 不變的原則：資料不出機房、唯讀優先、人工核准
-speckit.specify        # 這次要做什麼、不做什麼，從 .grill/ 的共識流程來
+speckit.specify        # 這次要做什麼、不做什麼，從 .grill/ 的共識流程來；餵 ambition-pass 改寫後的版本
 speckit.clarify        # 把 specify 裡模糊的地方問清楚
 ```
 （Claude / Gemini / Copilot 前面加 `/`，Codex 加 `$`，無 slash 的 agent 用自然語言；見 docs/agents.md）
@@ -56,8 +59,10 @@ speckit.clarify        # 把 specify 裡模糊的地方問清楚
 標出：無註解欄位、無外鍵但名稱像關聯的欄位、程式碼中無引用的表。
 ```
 
+盤點結論不准自評。每一條（例如「表 X 沒人用」、「預存程序 Y 寫入 Z」、敏感度等級）都要附一條唯讀驗證查詢或產物，以及它的結果。例如近 90 天寫入次數、`sys.sql_expression_dependencies` 的相依查詢、grep 命中。結果若與結論不符，這條退回未知項，交給 `inventory-gaps`。只准唯讀。不准對客戶資料庫執行寫入。
+
 - **輸出**：`inventory/report.md`（初稿，含未知項）
-- **做完的定義**：每個 spec 需求都有對應的盤點章節，未知項已集中列出。
+- **做完的定義**：每個 spec 需求都有對應的盤點章節，未知項已集中列出。每條結論都附了唯讀驗證結果；結果不符的已退回未知項。
 - **提醒**：REA 第一次跑大型 binary 可能要調 `REA_GHIDRA_STARTUP_TIMEOUT_MS`。
 
 ## 4. 補缺 inventory-gaps → grill-the-client
@@ -84,6 +89,8 @@ speckit.tasks    # 拆成任務，每個任務可獨立驗收
 - **做完的定義**：每個任務都有驗收條件，且能對應到敏感度分類表。
 
 ## 6. 實作 superpowers
+
+交給 superpowers 之前，對每個任務說明載入 `ambition-pass`。任務做深，不做大；改寫後不得比原文更大。
 
 superpowers 裝好後會自動介入：brainstorm → 寫 plan → TDD → 子 agent 執行。
 你要做的只有兩件事：

@@ -8,7 +8,7 @@ nice-kit 以 [Agent Skills 開放格式](https://agentskills.io) 為核心，
 
 | 元件 | Claude Code | Codex | Cursor | Gemini CLI | Copilot | OpenCode | Hermes | 其他 |
 |---|---|---|---|---|---|---|---|---|
-| grill-the-client / inventory-gaps（skill） | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ 任何讀 `.agents/skills` 或 `SKILL.md` 的 agent |
+| grill-the-client / inventory-gaps / ambition-pass（skill） | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ 任何讀 `.agents/skills` 或 `SKILL.md` 的 agent |
 | superpowers（skill） | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | planning-with-files（記憶，skill） | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | spec-kit（slash command） | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | windsurf, roo, kilocode, qwen, amp, codebuddy, q, auggie… |
@@ -50,8 +50,8 @@ spec-kit 產生的指令在各 agent 的呼叫方式：
 | Cursor | `/speckit.specify`（agent mode） |
 | Hermes、其他無 slash 的 agent | 自然語言：「依照 spec-kit 的 specify 流程寫 spec」 |
 
-nice-kit 自己的 skill 沒有 slash command 依賴。說「訪談客戶」「整理 unknowns」就會觸發；
-有 slash 的 agent 也可以 `/grill-the-client`。
+nice-kit 自己的 skill 沒有 slash command 依賴。說「訪談客戶」「整理 unknowns」「把這個任務做深」就會觸發；
+有 slash 的 agent 也可以 `/grill-the-client`、`/ambition-pass`。
 
 ## 只用一個 agent 的話
 
